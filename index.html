@@ -84,8 +84,9 @@
         curvaCtx.clearRect(0, 0, curvaElement.width, curvaElement.height);
         //Dibujar la curva en ell canvas
         curvaCtx.beginPath();
-        curvaCtx.moveTo(arrayLandmarks[0].x, arrayLandmarks[0].y);
-        for (const landmark of arrayLandmarks) {
+        const ultimo = arrayLandmarks.slice( -20);
+        curvaCtx.moveTo(ultimo[0].x, ultimo[0].y);
+        for (const landmark of arrayLandmarks.slice(0, -20)) {
           curvaCtx.lineTo(landmark.x * 200 + 200  , landmark.y * 200);
         }
         curvaCtx.stroke();
