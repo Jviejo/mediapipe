@@ -15,43 +15,84 @@
   </div>
 </body>
 <script type="module">
-  const videoElement = document.getElementsByClassName('input_video')[0];
-  const canvasElement = document.getElementsByClassName('output_canvas')[0];
-  const canvasCtx = canvasElement.getContext('2d');
+  // Elemento de video para capturar la entrada de la cámara
+const videoElement = document.getElementsByClassName('input_video')[0]; 
+// Elemento canvas para mostrar la salida con las detecciones
+const canvasElement = document.getElementsByClassName('output_canvas')[0]; 
+// Contexto 2D del canvas para dibujar
+const canvasCtx = canvasElement.getContext('2d'); 
 
-  function onResults(results) {
-    canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+/**
+ * Función que procesa los resultados de la detección de manos
+ * @param {Object} results - Resultados de la detección que incluyen la imagen y landmarks
+ */
+function onResults(results) {
+  // Guardar el estado actual del contexto
+  canvasCtx.save(); 
+  // Limpiar el canvas
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height); 
+  // Dibujar la imagen de la cámara en el canvas
   canvasCtx.drawImage(
-  results.image, 0, 0, canvasElement.width, canvasElement.height);
+    results.image, 
+    0, 
+    0, 
+    canvasElement.width, 
+    canvasElement.height
+  ); 
+  
+  // Si se detectaron manos
   if (results.multiHandLandmarks) {
+    // Procesar cada mano detectada
     for (const landmarks of results.multiHandLandmarks) {
-    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
-      { color: '#00FF00', lineWidth: 5 });
-  drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 2});
+      console.log(landmarks);
+      // Dibujar las conexiones entre puntos de referencia
+      drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
+        color: '#00FF00',
+        lineWidth: 5
+      }); 
+      // Dibujar los puntos de referencia
+      drawLandmarks(canvasCtx, landmarks, {
+        color: '#FF0000',
+        lineWidth: 2
+      });
     }
-  }
+  } 
+  // Restaurar el estado del contexto
   canvasCtx.restore();
-}
+} 
 
-  const hands = new Hands({locateFile: (file) => {
-  return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-}});
-  hands.setOptions({
-    maxNumHands: 2,
-  modelComplexity: 1,
-  minDetectionConfidence: 0.5,
+// Inicializar el modelo de detección de manos
+const hands = new Hands({
+  locateFile: (file) => { 
+    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`; 
+  }
+});
+
+// Configurar opciones del modelo
+hands.setOptions({
+  maxNumHands: 2,
+  modelComplexity: 1, 
+  minDetectionConfidence: 0.5, 
   minTrackingConfidence: 0.5
-});
-  hands.onResults(onResults);
+}); 
 
-  const camera = new Camera(videoElement, {
-    onFrame: async () => {
-    await hands.send({ image: videoElement });
-  },
-  width: 1280,
+// Asignar la función de callback para procesar resultados
+hands.onResults(onResults); 
+
+// Inicializar la cámara
+const camera = new Camera(videoElement, {
+  onFrame: async () => {
+    // Enviar cada frame al modelo para procesamiento
+    await hands.send({
+      image: videoElement
+    });
+  }, 
+  width: 1280, 
   height: 720
-});
-  camera.start();
+}); 
+
+// Iniciar la cámara
+camera.start();
+
 </script>
 </html>
